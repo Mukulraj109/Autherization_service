@@ -1,17 +1,18 @@
-const { StatusCodes } = require('http-status-codes');
-class AppErrors extends Error {
+const { StatusCodes } = require("http-status-codes");
+
+class AppError extends Error{
     constructor(
-        name = 'AppError', 
-        message = 'Something went wrong', 
-        explanation = 'Something went wrong', 
-        statusCode = StatusCodes.INTERNAL_SERVER_ERROR
-        ) {
+        name= "App Error",
+        message= "Something Wrong Occured",
+        explaination= "Something Wrong Occured",
+        statusCode= StatusCodes.INTERNAL_SERVER_ERROR
+    ){
         super();
-        this.message = message,
-        this.explanation = explanation,
-        this.name = name,
-        this.statusCode = statusCode
+        this.name=name,
+        this.message=message,
+        this.explaination=explaination,
+        this.statusCode=statusCode
     }
 }
 
-module.exports = AppErrors;
+module.exports= AppError;
