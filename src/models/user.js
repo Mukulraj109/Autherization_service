@@ -2,9 +2,10 @@
 const {
   Model
 } = require('sequelize');
-const bcrypt = require('bcrypt');
 
-const { SALT } = require('../config/serverConfig');
+const bcrypt = require("bcrypt");
+
+const { SALT } = require("../config/serverConfig");
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -15,8 +16,8 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.belongsToMany(models.Role, {
-        through: 'User_Roles',
-      })
+        through: 'User_Roles'
+      });
     }
   }
   User.init({
@@ -25,14 +26,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true,
       validate: {
-        isEmail: true
+        isEmail:true
       }
     },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        len: [3, 100]
+        len:[3,100]
       }
     }
   }, {
@@ -40,9 +41,13 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'User',
   });
 
-  User.beforeCreate((user) => {
-    const encryptedPassword = bcrypt.hashSync(user.password, SALT);
-    user.password = encryptedPassword;
+  //A hook may contain async actions - in this case the hook function should 
+  //return a promise as it can't use await.
+
+  User.beforeCreate((user)=>{
+    const encryptedPass=bcrypt.hashSync(user.password, SALT);
+    user.password= encryptedPass;
   });
+
   return User;
 };
