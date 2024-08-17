@@ -1,95 +1,96 @@
-const { response } = require('express');
-const UserService = require('../services/user-service');
+const UserService= require("../services/user-service");
 
-const userService = new UserService();
+const userService= new UserService();
 
-const create = async (req, res) => {
+const create= async (req, res)=>{
     try {
-        const response = await userService.create({
+        const data={
             email: req.body.email,
             password: req.body.password
-        });
+        };
+
+        const response= await userService.create(data);
         return res.status(201).json({
-            success: true,
-            message: 'Successfully created a new user',
             data: response,
-            err: {}
+            error:{},
+            success: true,
+            message: "Successfully Created User"
         });
     } catch (error) {
-        // console.log(error);
+        console.log("Error in Controller Layer");
         return res.status(error.statusCode).json({
-            message: error.message,
             data: {},
+            error:error.explaination,
             success: false,
-            err: error.explanation
+            message: error.message
         });
     }
 }
 
-const signIn = async (req, res) => {
+const signIn= async (req,res)=>{
     try {
-        const response = await userService.signIn(req.body.email, req.body.password);
-        return res.status(200).json({
-            success: true,
-            data: response,
-            err: {},
-            message: 'Successfully signed in'
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message: 'Something went wrong',
-            data: {},
-            success: false,
-            err: error
-        });
-    }
-}
-
-const isAuthenticated = async (req, res) => {
-    try {
-        const token = req.headers['x-access-token'];
-        const response = await userService.isAuthenticated(token);
-        return res.status(200).json({
-            success: true,
-            err: {},
-            data: response,
-            message: 'user is authenticated and token is valid'
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message: 'Something went wrong',
-            data: {},
-            success: false,
-            err: error
-        });
-    }
-}
-
-const isAdmin = async(req, res) => {
-    try {
-        const response = await userService.isAdmin(req.body.id);
+        const response= await userService.signIn(req.body.email, req.body.password);
         return res.status(200).json({
             data: response,
-            err: {},
+            error:{},
             success: true,
-            message: 'Successfully fetched whether user is admin or not'
-        })
+            message: "Successfully SignIn"
+        });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message: 'Something went wrong',
+        console.log("Error in Controller Layer");
+        return res.status(error.statusCode).json({
             data: {},
+            error:error.explaination,
             success: false,
-            err: error
+            message: error.message
         });
     }
 }
 
-module.exports = {
+const isAuthentic= async (req,res)=>{
+    try {
+        const token=req.headers['x-access-token'];
+        const response= await userService.isAuthentic(token)
+        return res.status(200).json({
+            data: response,
+            error:{},
+            success: true,
+            message: "User successfully Authenticated"
+        });
+    } catch (error) {
+        console.log("Error in Controller Layer");
+        return res.status(500).json({
+            data: {},
+            error:error,
+            success: false,
+            message: "Authentication Failed"
+        });
+    }
+}
+
+const isAdmin= async(req,res)=>{
+    try {
+        const response= await userService.isAdmin(req.body.id);
+        return res.status(200).json({
+            data: response,
+            error:{},
+            success: true,
+            message: "Successfully fetched weather user has Admin Role or Not"
+        });
+    } catch (error) {
+        console.log("Error in Controller Layer");
+        return res.status(500).json({
+            data: {},
+            error:error,
+            success: false,
+            message: "User Doesn't have Admin Role"
+        });
+    }
+}
+
+module.exports={
     create,
     signIn,
-    isAuthenticated,
+    isAuthentic,
     isAdmin
 }
