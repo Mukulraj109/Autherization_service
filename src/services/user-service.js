@@ -1,102 +1,98 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const UserRepository= require("../repository/user-repository");
+const jwt= require("jsonwebtoken");
+const bcrypt= require("bcrypt");
+const { JWT_KEY }= require("../config/serverConfig");
 
-const UserRepository = require('../repository/user-repository');
-const { JWT_KEY } = require('../config/serverConfig');
-const AppErrors = require('../utils/error-handler');
-
-class UserService {
-    constructor() {
-        this.userRepository = new UserRepository();
+class UserService{
+    constructor(){
+        this.userRepository= new UserRepository();
     }
 
-    async create(data) {
+    async create(data){
         try {
-            const user = await this.userRepository.create(data);
+            const user= await this.userRepository.create(data);
             return user;
         } catch (error) {
-            if(error.name == 'SequelizeValidationError') {
-                throw error;
-            }
-            console.log("Something went wrong in the service layer");
+            console.log("Problem in Service Layer");
             throw error;
         }
     }
 
-    async signIn(email, plainPassword) {
+    async signIn(email, plainPassword){
         try {
-            // step 1-> fetch the user using the email
-            const user = await this.userRepository.getByEmail(email);
-            // step 2-> compare incoming plain password with stores encrypted password
-            const passwordsMatch = this.checkPassword(plainPassword, user.password);
+            const user= await this.userRepository.getByEmail(email);
 
-            if(!passwordsMatch) {
-                console.log("Password doesn't match");
-                throw {error: 'Incorrect password'};
+            const isPassword=await this.checkPassword(plainPassword, user.password);
+
+            if(!isPassword){
+                throw {error: "Password Doesn,t match"};
             }
-            // step 3-> if passwords match then create a token and send it to the user
-            const newJWT = this.createToken({email: user.email, id: user.id});
-            return newJWT;
+
+            const token= this.createToken({email:user.email, id:user.id});
+            return token;
+
         } catch (error) {
-            console.log("Something went wrong in the sign in process");
+            console.log("Problem in Service Layer");
             throw error;
         }
     }
 
-    async isAuthenticated(token) {
+    createToken(user){
         try {
-            const response = this.verifyToken(token);
-            if(!response) {
-                throw {error: 'Invalid token'}
+            const token=jwt.sign(user, JWT_KEY, {expiresIn: '1d'});
+            return token;
+        } catch (error) {
+            console.log("Problem in JWT Creation");
+            throw {error};
+        }
+    }
+
+    verifyToken(token){
+        try {
+            const result= jwt.verify(token, JWT_KEY);
+            return result;
+        } catch (error) {
+            console.log("Problem in JWT Verification", error);
+            throw {error};
+        }
+    }
+
+    async checkPassword(plainPassword, encryptedPassword){
+        try {
+            const result=await bcrypt.compare(plainPassword, encryptedPassword);
+            return result;
+        } catch (error) {
+            console.log("Problem in Service Layer[checkPassword]");
+            throw {error};
+        }
+    }
+
+    async isAuthentic(token){
+        try {
+            const response= this.verifyToken(token);
+            if(!response){
+                throw {error: "User Token is Invalid"};
             }
-            const user = await this.userRepository.getById(response.id);
-            if(!user) {
-                throw {error: 'No user with the corresponding token exists'};
+            const user=await this.userRepository.getById(response.id);
+            if(!user){
+                throw {error: "User doesn't exist anymore"};
             }
             return user.id;
         } catch (error) {
-            console.log("Something went wrong in the auth process");
-            throw error;
+            console.log("Problem in Service Layer[isAuthentic]");
+            throw {error};
         }
     }
 
-    createToken(user) {
+    async isAdmin(userId){
         try {
-            const result = jwt.sign(user, JWT_KEY, {expiresIn: '1d'});
+            const result= await this.userRepository.isAdmin(userId);
             return result;
         } catch (error) {
-            console.log("Something went wrong in token creation");
-            throw error;
-        }
-    }
-
-    verifyToken(token) {
-        try {
-            const response = jwt.verify(token, JWT_KEY);
-            return response;
-        } catch (error) {
-            console.log("Something went wrong in token validation", error);
-            throw error;
-        }
-    }
-
-    checkPassword(userInputPlainPassword, encryptedPassword) {
-        try {
-            return bcrypt.compareSync(userInputPlainPassword, encryptedPassword);
-        } catch (error) {
-            console.log("Something went wrong in password comparison");
-            throw error;
-        }
-    }
-
-    isAdmin(userId) {
-        try {
-            return this.userRepository.isAdmin(userId);
-        } catch (error) {
-            console.log("Something went wrong in service layer");
-            throw error;
+            console.log("Problem in Service Layer");
+            throw {error};
         }
     }
 }
 
-module.exports = UserService;
+module.exports= UserService;
