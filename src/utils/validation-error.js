@@ -1,19 +1,20 @@
-const AppError = require('./error-handler');
-const { StatusCodes } = require('http-status-codes');
+const AppError= require("./error-handler");
+const { StatusCodes }= require("http-status-codes");
 
-class ValidationError extends AppError {
-    constructor(error) {
-        let errorName = error.name;
-        let explanation = [];
-        error.errors.forEach((err) => {
-            explanation.push(err.message);
+class ValidationError extends AppError{
+    constructor(error){
+        let errorName= error.name;
+        let errorMessages=[];
+
+        error.errors.forEach((err)=>{
+            errorMessages.push(err.message);
         });
+
         let errorExplaination= "User Entered Invalid Input Format";
         let statusCode= StatusCodes.BAD_REQUEST;
 
-
         super(
-           errorName,
+            errorName,
             errorMessages,
             errorExplaination,
             statusCode
@@ -21,4 +22,4 @@ class ValidationError extends AppError {
     }
 }
 
-module.exports = ValidationError;
+module.exports= ValidationError;
