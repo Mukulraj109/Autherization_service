@@ -8,12 +8,15 @@ class ValidationError extends AppError {
         error.errors.forEach((err) => {
             explanation.push(err.message);
         });
+        let errorExplaination= "User Entered Invalid Input Format";
+        let statusCode= StatusCodes.BAD_REQUEST;
+
 
         super(
-            errorName,
-            'Not able to validate the data sent in the request',
-            explanation,
-            StatusCodes.BAD_REQUEST
+           errorName,
+            errorMessages,
+            errorExplaination,
+            statusCode
         );
     }
 }
