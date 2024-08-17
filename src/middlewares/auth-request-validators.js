@@ -1,28 +1,30 @@
-const validateUserAuth = (req, res, next) => {
-    if(!req.body.email || !req.body.password) {
+const authRequestValidator=(req,res,next)=>{
+    if(!req.body.email || !req.body.password){
         return res.status(400).json({
+            data:{},
             success: false,
-            data: {},
-            message: 'Something went wrong',
-            err: 'Email or password missing in the request'
+            message:"Email or Password doesn't sent to the request",
+            err:{}
         });
     }
+
     next();
 }
 
-const validateIsAdminRequest = (req, res, next) => {
-    if(!req.body.id) {
+const isAdminValidator=(req,res,next)=>{
+    if(!req.body.id){
         return res.status(400).json({
+            data:{},
             success: false,
-            data: {},
-            err: 'User id not given',
-            message: 'Something went wrong'
-        })
+            message:"Please enter an user ID",
+            err:{}
+        });
     }
+
     next();
 }
 
-module.exports = {
-    validateUserAuth,
-    validateIsAdminRequest
+module.exports={
+    authRequestValidator,
+    isAdminValidator
 }
